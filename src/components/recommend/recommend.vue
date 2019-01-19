@@ -16,7 +16,15 @@
         <div class="recommend-list">
           <h1 class="list-title">热门歌曲推荐</h1>
           <ul>
-            <li class="item"></li>
+            <li class="item">
+              <div class="icon">
+                <img width="60" height="60" src="">
+              </div>
+              <div class="text">
+                <h2 class="name"></h2>
+                <p class="desc"></p>
+              </div>
+            </li>
           </ul>
         </div>
       </div>
@@ -30,23 +38,32 @@
 <script>
   import Slider from 'base/slider/slider'
   import Loading from 'base/loading/loading'
-  import {getRecommend} from 'api/recommend'
+  import {getRecommend, getDiscList} from 'api/recommend'
   import {ERR_OK} from 'api/config'
 
   export default {
     data() {
       return {
-        recommends: []
+        recommends: [],
+        discList: []
       }
     },
     created() {
       this._getRecommend()
+      this._getDiscList()
     },
     methods: {
       _getRecommend() {
         getRecommend().then((res) => {
           if (res.code === ERR_OK) {
             this.recommends = res.data.slider
+          }
+        })
+      },
+      _getDiscList() {
+        getDiscList().then((res) => {
+          if (res.code === ERR_OK) {
+            console.log(res)
           }
         })
       }
