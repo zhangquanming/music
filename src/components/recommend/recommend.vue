@@ -1,13 +1,13 @@
 <template>
   <div class="recommend">
-    <div class="recommend-content">
+    <scroll ref="scroll" :data="discList" class="recommend-content">
       <div>
         <div v-if="recommends.length" class="slider-wrapper">
           <div class="slider-content">
             <slider ref="slider">
               <div v-for="(item,index) in recommends" :key="index">
                 <a :href="item.linkUrl">
-                  <img :src="item.picUrl">
+                  <img @load="loadImage" :src="item.picUrl">
                 </a>
               </div>
             </slider>
@@ -16,28 +16,29 @@
         <div class="recommend-list">
           <h1 class="list-title">热门歌曲推荐</h1>
           <ul>
-            <li class="item">
+            <li @click="selectItem(item)" class="item" v-for="item in discList" :key="item.dissid">
               <div class="icon">
-                <img width="60" height="60" src="">
+                <img width="60" height="60" v-lazy="item.imgurl">
               </div>
               <div class="text">
-                <h2 class="name"></h2>
-                <p class="desc"></p>
+                <h2 class="name" v-html="item.creator.name"></h2>
+                <p class="desc" v-html="item.dissname"></p>
               </div>
             </li>
           </ul>
         </div>
       </div>
-      <div class="loading-container">
+      <div class="loading-container" v-show="!discList.length">
         <loading></loading>
       </div>
-    </div>
+    </scroll>
   </div>
 </template>
 
 <script>
   import Slider from 'base/slider/slider'
   import Loading from 'base/loading/loading'
+  import Scroll from 'base/scroll/scroll'
   import {getRecommend, getDiscList} from 'api/recommend'
   import {ERR_OK} from 'api/config'
 
@@ -52,7 +53,23 @@
       this._getRecommend()
       this._getDiscList()
     },
+    activated() {
+      setTimeout(() => {
+        this.$refs.slider && this.$refs.slider.refresh()
+      }, 20)
+    },
     methods: {
+      selectItem(item) {
+        console.log(item)
+      },
+      loadImage() {
+        if (!this.checkloaded) {
+          this.checkloaded = true
+          setTimeout(() => {
+            this.$refs.scroll.refresh()
+          }, 20)
+        }
+      },
       _getRecommend() {
         getRecommend().then((res) => {
           if (res.code === ERR_OK) {
@@ -63,14 +80,15 @@
       _getDiscList() {
         getDiscList().then((res) => {
           if (res.code === ERR_OK) {
-            console.log(res)
+            this.discList = res.data.list
           }
         })
       }
     },
     components: {
       Slider,
-      Loading
+      Loading,
+      Scroll
     }
   }
 </script>
